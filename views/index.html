@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io</title>
+</head>
+
+<body>
+    <h1>I'm <span id="myName" style="color: green;"></span></h1>
+    <h2>Active Users: </h2>
+    <ol id="activeContainer"></ol>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        const loggedInUser = JSON.parse(localStorage.getItem("user"));
+
+        if (!loggedInUser) {
+            window.location.replace("/login");
+        }
+
+        document.getElementById("myName").innerText = loggedInUser.name;
+
+        const socket = io({
+            auth: {
+                user: loggedInUser
+            }
+        });
+
+        socket.on("connect", () => {
+            console.log("Successfully Connected!");
+        });
+
+        socket.on("active", (data) => {
+            let container = "";
+            data.active.forEach(element => {
+                container += `<li>${element.name} <button onclick="sendMessage(${element.id})">send message</li>`;
+            });
+            document.getElementById("activeContainer").innerHTML = container;
+        });
+
+        function sendMessage(receiverId) {
+            window.location.replace(`/chat?id=${receiverId}`);
+        }
+
+    </script>
+</body>
+
+</html>
